@@ -40,14 +40,14 @@ function gifify(streamOrFile, opts) {
   }
 
   var ffmpegArgs = computeFFmpegArgs(opts);
-  var convertArgs = computeConvertArgs(opts);
+  var magickArgs = computeMagickArgs(opts);
   var gifsicleArgs = computeGifsicleArgs(opts);
 
   var ffmpeg = spawn('ffmpeg', ffmpegArgs);
-  var convert = spawn('convert', convertArgs);
+  var magick = spawn('magick', magickArgs);
   var gifsicle = spawn('gifsicle', gifsicleArgs);
 
-  [ffmpeg, convert, gifsicle].forEach(function handleErrors(child) {
+  [ffmpeg, magick, gifsicle].forEach(function handleErrors(child) {
     child.on('error', gifsicle.emit.bind(gifsicle, 'error'));
     child.stderr.on('data', function gotSomeErrors(buf) {
       // emit errors on the resolved stream
@@ -68,8 +68,8 @@ function gifify(streamOrFile, opts) {
     streamOrFile.pipe(ffmpeg.stdin);
   }
 
-  ffmpeg.stdout.pipe(convert.stdin);
-  convert.stdout.pipe(gifsicle.stdin);
+  ffmpeg.stdout.pipe(magick.stdin);
+  magick.stdout.pipe(gifsicle.stdin);
   return gifsicle.stdout;
 }
 
@@ -139,7 +139,7 @@ function computeFFmpegArgs(opts) {
   return args;
 }
 
-function computeConvertArgs(opts) {
+function computeMagickArgs(opts) {
   // Convert options
   // http://www.imagemagick.rg/script/convert.php#options
   var args = [
@@ -161,7 +161,7 @@ function computeConvertArgs(opts) {
 
   args.push('gif:-');
 
-  debug('convert args: %j', args);
+  debug('magick args: %j', args);
 
   return args;
 }
